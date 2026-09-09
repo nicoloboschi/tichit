@@ -75,7 +75,7 @@ struct ComposerView: View {
                 .font(.system(size: 13))
                 .scrollContentBackground(.hidden)
                 .padding(6)
-                .frame(height: 96)
+                .frame(height: 80)
                 .background(Color(nsColor: .textBackgroundColor))
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
@@ -109,11 +109,11 @@ struct ComposerView: View {
                 ScrollView {
                     resultBody(result)
                 }
-                .frame(maxHeight: 260)
+                .frame(minHeight: 180, maxHeight: 520)
             }
         }
         .padding(14)
-        .frame(width: 420)
+        .frame(width: 620)
         .onAppear { inputFocused = true }
     }
 
@@ -170,9 +170,14 @@ struct ComposerView: View {
                         .keyboardShortcut("c", modifiers: [.command, .shift])
                 }
                 Text(result.improved)
-                    .font(.system(size: 13))
+                    .font(.system(size: 17, weight: .medium))
+                    .lineSpacing(3)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.accentColor.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
             }
 
             if let alternative = result.alternative, !alternative.isEmpty {
@@ -186,7 +191,8 @@ struct ComposerView: View {
                             .buttonStyle(.link)
                     }
                     Text(alternative)
-                        .font(.system(size: 13))
+                        .font(.system(size: 14))
+                        .lineSpacing(2)
                         .textSelection(.enabled)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -209,9 +215,9 @@ struct ComposerView: View {
                                 Text(note.suggestion)
                                     .foregroundStyle(.primary)
                             }
-                            .font(.system(size: 12))
+                            .font(.system(size: 13))
                             Text(note.reason)
-                                .font(.system(size: 11))
+                                .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
                         }
                         .fixedSize(horizontal: false, vertical: true)
