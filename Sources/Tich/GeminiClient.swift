@@ -50,7 +50,7 @@ enum GeminiError: LocalizedError {
 }
 
 struct GeminiClient {
-    var model = "gemini-2.5-flash"
+    var model = "gemini-3.7-flash"
 
     private static let systemPrompt = """
     You are an English writing coach for a fluent but non-native speaker (Italian first language).

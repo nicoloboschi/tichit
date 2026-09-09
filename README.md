@@ -30,4 +30,4 @@ For `swift run` during development you can set `GEMINI_API_KEY` instead.
 - Type, pick a tone, hit **⌘↩**.
 - **⌘⇧C** copies the improved text.
 
-Model: `gemini-2.5-flash`, structured JSON output, thinking disabled for latency.
+Model: `gemini-3.7-flash`, structured JSON output, thinking disabled for latency.
