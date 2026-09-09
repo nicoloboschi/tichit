@@ -10,6 +10,44 @@ enum History {
 
     static var fileURL: URL { directory.appendingPathComponent("history.jsonl") }
 
+    struct Entry: Identifiable, Decodable {
+        let date: Date
+        let tone: String
+        let original: String
+        let improved: String
+        let notes: [Note]
+
+        var id: String { ISO8601DateFormatter().string(from: date) + original }
+    }
+
+    /// Newest first. Unparseable lines are skipped rather than failing the whole log.
+    static func load() -> [Entry] {
+        guard let data = try? Data(contentsOf: fileURL),
+              let text = String(data: data, encoding: .utf8)
+        else { return [] }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let raw = try decoder.singleValueContainer().decode(String.self)
+            guard let date = ISO8601DateFormatter().date(from: raw) else {
+                throw DecodingError.dataCorruptedError(
+                    in: try decoder.singleValueContainer(),
+                    debugDescription: "bad date \(raw)"
+                )
+            }
+            return date
+        }
+
+        return text
+            .split(separator: "\n")
+            .compactMap { try? decoder.decode(Entry.self, from: Data($0.utf8)) }
+            .reversed()
+    }
+
+    static func clear() {
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
     static func append(original: String, suggestion: Suggestion, tone: Tone) {
         let entry: [String: Any] = [
             "date": ISO8601DateFormatter().string(from: Date()),

@@ -18,7 +18,7 @@ enum Tone: String, CaseIterable, Identifiable {
     }
 }
 
-struct Note: Decodable, Identifiable {
+struct Note: Codable, Identifiable {
     let original: String
     let suggestion: String
     let reason: String

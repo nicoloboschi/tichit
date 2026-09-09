@@ -124,6 +124,8 @@ struct ComposerView: View {
             Spacer()
             Menu {
                 Button("Clear") { composer.reset() }
+                Button("History…") { HistoryWindow.show() }
+                    .keyboardShortcut("y", modifiers: .command)
                 Button("Settings…") { SettingsWindow.show() }
                 Divider()
                 Button("Quit Tich") { NSApp.terminate(nil) }
