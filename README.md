@@ -5,9 +5,31 @@ A macOS menu bar app that turns your English into native-sounding English.
 Phase 1 (this): type or paste a sentence, get a natural rewrite plus a short list of
 what changed and why — meant to be used right before you hit send on an email.
 
-Phase 2 (planned): passively capture everything you write and surface the mistakes
-you keep repeating. Every rewrite is already logged to
-`~/Library/Application Support/Tich/history.jsonl` to feed that.
+Phase 2 (now): passively capture everything you type, one sentence per row, so the
+app can later surface the mistakes you keep repeating.
+
+## Capture
+
+Turn on **Capture my typing** in the ⋯ menu. macOS will ask for Accessibility
+permission (System Settings → Privacy & Security → Accessibility). A red dot in the
+popover shows whenever capture is live, and the Captured tab of the History window
+shows what has been recorded.
+
+Sentences are split on `.`/`!`/`?`, on Return, after 3s idle, or when you switch app.
+
+What is deliberately **not** recorded:
+
+- anything typed while macOS secure input is on (password fields)
+- anything typed in Keychain Access, 1Password, Bitwarden, Terminal, iTerm, Warp
+  (`KeystrokeCapture.defaultDenylist`)
+- ⌘/⌃/⌥ shortcuts
+- anything that doesn't look like prose: under 12 chars, fewer than 3 words,
+  under 55% letters, or starting with a URL or path
+
+Everything stays on this machine in
+`~/Library/Application Support/Tich/`: `history.jsonl` (rewrites) and
+`captured.jsonl` (passive capture). Nothing is sent anywhere until you press Improve.
+Delete either file to wipe it.
 
 ## Build
 

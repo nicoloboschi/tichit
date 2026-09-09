@@ -27,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         registerHotKey()
+        KeystrokeCapture.shared.startIfEnabled()
 
         if Config.apiKey == nil {
             SettingsWindow.show()
