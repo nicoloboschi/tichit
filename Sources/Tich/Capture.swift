@@ -86,6 +86,19 @@ final class KeystrokeCapture: ObservableObject {
         "dev.tich.app",
     ]
 
+    /// Apps where Return sends the message, so it really is the end of a thought.
+    /// Everywhere else Return is just a line break inside a paragraph.
+    static let returnSendsApps: Set<String> = [
+        "com.tinyspeck.slackmacgap",
+        "com.hnc.Discord",
+        "net.whatsapp.WhatsApp",
+        "com.apple.MobileSMS",
+        "org.telegram.desktop",
+        "ru.keepcoder.Telegram",
+        "com.microsoft.teams2",
+        "com.apple.iChat",
+    ]
+
     private var tap: CFMachPort?
     private var source: CFRunLoopSource?
     private var buffer = ""
@@ -197,7 +210,18 @@ final class KeystrokeCapture: ObservableObject {
             restartIdleTimer()
             return
         case 36, 76: // return, enter
-            flush()
+            // In a chat app Return sends the message, so it ends the thought. In a
+            // mail client or editor it is a line break inside a paragraph, and
+            // flushing there would cut sentences in half — join the lines instead and
+            // let the terminator, the idle timer or an app switch close the sentence.
+            if buffer.trimmingCharacters(in: .whitespaces).isEmpty {
+                buffer = ""
+            } else if Self.returnSendsApps.contains(frontmost) || endsSentence(buffer) {
+                flush()
+            } else {
+                buffer.append(" ")
+                restartIdleTimer()
+            }
             return
         case 53: // escape
             buffer = ""
@@ -224,6 +248,15 @@ final class KeystrokeCapture: ObservableObject {
         } else if buffer.count >= maxBuffer {
             flush()
         }
+    }
+
+    private func endsSentence(_ text: String) -> Bool {
+        guard let last = text.trimmingCharacters(in: .whitespaces).last else { return false }
+        return ".!?".contains(last)
+    }
+
+    private func wordCount(_ text: String) -> Int {
+        text.split(whereSeparator: { $0 == " " || $0.isNewline }).count
     }
 
     private func restartIdleTimer() {

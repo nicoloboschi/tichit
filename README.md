@@ -15,7 +15,10 @@ permission (System Settings → Privacy & Security → Accessibility). A red dot
 popover shows whenever capture is live, and the Captured tab of the History window
 shows what has been recorded.
 
-Sentences are split on `.`/`!`/`?`, on Return, after 3s idle, or when you switch app.
+Sentences are split on `.`/`!`/`?`, after 3s idle, or when you switch app. Return is
+a boundary only in chat apps where it sends the message (`returnSendsApps`); in a mail
+client or editor it is treated as a line break and the lines are joined, so a paragraph
+typed across several lines stays one sentence.
 
 What is deliberately **not** recorded:
 
