@@ -55,8 +55,14 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if capture.isEnabled, !capture.isRunning {
-                Button("Open Accessibility settings") {
-                    capture.openAccessibilitySettings()
+                HStack {
+                    Button("Open Accessibility settings") {
+                        capture.openAccessibilitySettings()
+                    }
+                    Button("Reset and ask again") {
+                        capture.resetPermission()
+                    }
+                    .help("Clears the stale permission record and re-prompts")
                 }
             }
 
@@ -77,7 +83,15 @@ struct SettingsView: View {
         if capture.isRunning {
             return "On — recording sentences typed in Brave and Slack. Nothing else is watched."
         }
-        return "Waiting for Accessibility permission. Add Tichit under Privacy & Security → Accessibility; capture starts by itself once you do."
+        return """
+            Waiting for Accessibility permission — capture starts by itself once macOS \
+            grants it.
+
+            If System Settings already lists Tichit as enabled, the permission went \
+            stale: the app is ad-hoc signed, so rebuilding it changes its code hash \
+            and the old grant no longer matches. Click “Reset and ask again”, then \
+            approve the prompt.
+            """
     }
 
     private var providerStatus: String {

@@ -59,8 +59,15 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-# Ad-hoc signature: keeps the Keychain item bound to a stable identity.
-codesign --force --sign - "$APP" >/dev/null 2>&1 || echo "warning: ad-hoc codesign failed"
+# A real signing identity keeps macOS permissions (Accessibility in particular) across
+# rebuilds; ad-hoc changes the code hash every time, which silently invalidates them.
+SIGN_IDENTITY="${TICHIT_SIGN_IDENTITY:--}"
+codesign --force --sign "$SIGN_IDENTITY" "$APP" >/dev/null 2>&1 \
+    || echo "warning: codesign with '$SIGN_IDENTITY' failed"
+if [ "$SIGN_IDENTITY" = "-" ]; then
+    echo "note: ad-hoc signed — macOS will drop Accessibility permission on each rebuild."
+    echo "      Set TICHIT_SIGN_IDENTITY to a code-signing identity to avoid that."
+fi
 
 echo "Built $APP"
 

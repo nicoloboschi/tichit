@@ -89,8 +89,18 @@ break so a paragraph typed across lines stays one sentence. Everything is stored
 locally in `~/Library/Application Support/Tichit/captured.jsonl`.
 
 > **Note:** the app is ad-hoc signed, so its code hash changes on every rebuild and
-> macOS drops the Accessibility grant. If capture stops after you rebuild, remove
-> Tichit under Privacy & Security → Accessibility and add it again.
+> the Accessibility grant stops matching — while System Settings still shows Tichit as
+> enabled, which makes it look like the app is lying. Settings → **Reset and ask
+> again** clears the stale record and re-prompts.
+>
+> To avoid it entirely, build with a real code-signing identity:
+>
+> ```sh
+> TICHIT_SIGN_IDENTITY="Apple Development: you@example.com" ./scripts/build-app.sh --install
+> ```
+>
+> Any stable identity works, including a self-signed one created in Keychain Access
+> (Certificate Assistant → Create a Certificate → Code Signing).
 
 ## Install
 

@@ -199,6 +199,23 @@ final class KeystrokeCapture: ObservableObject {
         awaitingPermission = false
     }
 
+    /// Clears this app's Accessibility record and asks again.
+    ///
+    /// The bundle is ad-hoc signed, so its code hash changes on every rebuild and a
+    /// previously granted permission stops matching — while System Settings still
+    /// lists Tichit as enabled. Resetting the record is the only way back, and it is
+    /// far easier than talking someone through removing and re-adding the app.
+    func resetPermission() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+        process.arguments = ["reset", "Accessibility", "dev.tichit.app"]
+        try? process.run()
+        process.waitUntilExit()
+
+        stop()
+        isEnabled = true
+    }
+
     /// Opens the exact System Settings pane, so it is one click rather than a hunt.
     func openAccessibilitySettings() {
         let url = URL(
