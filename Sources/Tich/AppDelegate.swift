@@ -28,7 +28,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         registerHotKey()
 
-        if Config.apiKey == nil {
+        // Only nag for a key when there is no working provider at all.
+        if Provider.resolved == .gemini, Config.apiKey == nil {
             SettingsWindow.show()
         }
     }

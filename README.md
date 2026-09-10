@@ -22,9 +22,19 @@ Copy it to `/Applications` when you like it. No Xcode needed, just the Swift too
 
 ## Setup
 
-On first launch it opens Settings and asks for a Gemini API key
-(https://aistudio.google.com/apikey). It is stored in the macOS Keychain.
-For `swift run` during development you can set `GEMINI_API_KEY` instead.
+Two ways to power it, chosen in Settings (default **Automatic**):
+
+- **Codex subscription** — if the Codex CLI is installed and logged in
+  (`~/.codex/auth.json`), rewrites run through `codex exec` with `gpt-5.6-luna`.
+  No API key, nothing to pay per call. Slower: ~13-30s, because each rewrite is a
+  full agent turn (~13k tokens of overhead).
+- **Gemini API key** — `gemini-3.7-flash` over HTTPS, ~3s. Get a key at
+  https://aistudio.google.com/apikey; it is stored in the macOS Keychain.
+  For `swift run` you can set `GEMINI_API_KEY` instead.
+
+Automatic prefers Codex when it is signed in and falls back to Gemini. Both providers
+are sent the identical brief (`Prompts.system`), so switching changes the model, not
+the behaviour.
 
 ## Use
 
@@ -36,4 +46,5 @@ Everything stays on this machine: rewrites are logged to
 `~/Library/Application Support/Tich/history.jsonl`. Nothing is sent anywhere until
 you ask for an improvement. Delete that file to wipe it.
 
-Model: `gemini-3.7-flash`, structured JSON output, thinking disabled for latency.
+Structured JSON output on both providers: `responseSchema` on Gemini,
+`--output-schema` on Codex.

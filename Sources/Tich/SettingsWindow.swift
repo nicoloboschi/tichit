@@ -4,9 +4,26 @@ import SwiftUI
 struct SettingsView: View {
     @State private var apiKey = Keychain.read() ?? ""
     @State private var saved = false
+    @State private var provider = Provider.current
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            Text("Rewrites come from")
+                .font(.headline)
+            Picker("", selection: $provider) {
+                ForEach(Provider.allCases) { Text($0.label).tag($0) }
+            }
+            .labelsHidden()
+            .pickerStyle(.radioGroup)
+            .onChange(of: provider) { _, new in Provider.current = new }
+
+            Text(providerStatus)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Divider()
+
             Text("Gemini API key")
                 .font(.headline)
             Text("Stored in your macOS Keychain. Get one at aistudio.google.com/apikey.")
@@ -34,7 +51,18 @@ struct SettingsView: View {
                 .textSelection(.enabled)
         }
         .padding(18)
-        .frame(width: 400)
+        .frame(width: 440)
+    }
+
+    private var providerStatus: String {
+        switch Provider.resolved {
+        case .codex where CodexCLI.isAvailable:
+            return "Using the Codex CLI with your existing subscription login — no API key needed. Slower (~30s), since it runs a full agent turn."
+        case .codex:
+            return "Codex CLI not found or not logged in. Install it and run `codex login`."
+        default:
+            return "Using the Gemini API with the key below. Fast (~3s)."
+        }
     }
 }
 
