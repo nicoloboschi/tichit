@@ -66,7 +66,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        // The completion-handler form calls back off the main queue; declared inside
+        // this @MainActor class that trips Swift's executor assertion and kills the
+        // app. The async form hops back properly.
+        Task {
+            _ = try? await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound])
+        }
     }
 
     private func notifyReady() {
@@ -80,7 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             content: content,
             trigger: nil
         )
-        UNUserNotificationCenter.current().add(request)
+        Task { try? await UNUserNotificationCenter.current().add(request) }
     }
 
     func togglePopoverFromNotification() {
