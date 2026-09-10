@@ -65,32 +65,26 @@ final class Composer: ObservableObject {
 
 struct ComposerView: View {
     @ObservedObject var composer: Composer
-    @ObservedObject private var capture = KeystrokeCapture.shared
-    @FocusState private var inputFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
 
-            TextEditor(text: $composer.input)
-                .font(.system(size: 13))
-                .scrollContentBackground(.hidden)
-                .padding(6)
-                .frame(height: 80)
+            SentenceEditor(text: $composer.input) { composer.improve() }
+                .frame(height: 84)
                 .background(Color(nsColor: .textBackgroundColor))
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor))
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 6))
-                .focused($inputFocused)
                 .overlay(alignment: .topLeading) {
                     if composer.input.isEmpty {
-                        Text("Write the sentence you want to send…")
+                        Text("Write in English or Italian…")
                             .foregroundStyle(.tertiary)
-                            .font(.system(size: 13))
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 14)
+                            .font(.system(size: 14))
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 10)
                             .allowsHitTesting(false)
                     }
                 }
@@ -110,27 +104,20 @@ struct ComposerView: View {
                 ScrollView {
                     resultBody(result)
                 }
-                .frame(minHeight: 180, maxHeight: 520)
+                .frame(minHeight: 260, maxHeight: 720)
             }
         }
         .padding(14)
-        .frame(width: 620)
-        .onAppear { inputFocused = true }
+        .frame(width: 680)
     }
 
     private var header: some View {
         HStack {
             Text("Tich")
                 .font(.headline)
-            if capture.isRunning {
-                Image(systemName: "record.circle")
-                    .foregroundStyle(.red)
-                    .help("Capturing your typing. Turn it off in the ⋯ menu.")
-            }
             Spacer()
             Menu {
                 Button("Clear") { composer.reset() }
-                Toggle("Capture my typing", isOn: $capture.isEnabled)
                 Button("History…") { HistoryWindow.show() }
                     .keyboardShortcut("y", modifiers: .command)
                 Button("Settings…") { SettingsWindow.show() }
@@ -157,6 +144,10 @@ struct ComposerView: View {
             if composer.isLoading {
                 ProgressView().controlSize(.small)
             }
+
+            Text("↵ improve · ⇧↵ new line")
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
 
             Button("Improve") { composer.improve() }
                 .keyboardShortcut(.return, modifiers: .command)

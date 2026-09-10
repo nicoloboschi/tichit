@@ -1,25 +1,10 @@
 import AppKit
 import SwiftUI
 
-enum HistoryTab: String, CaseIterable, Identifiable {
-    case improved = "Improved"
-    case captured = "Captured"
-    var id: String { rawValue }
-}
-
 struct HistoryView: View {
     @State private var entries: [History.Entry] = []
-    @State private var captured: [CapturedSentence] = []
-    @State private var tab: HistoryTab = .improved
     @State private var search = ""
 
-    private var filteredCaptured: [CapturedSentence] {
-        let query = search.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !query.isEmpty else { return captured }
-        return captured.filter {
-            $0.text.lowercased().contains(query) || $0.app.lowercased().contains(query)
-        }
-    }
 
     private var filtered: [History.Entry] {
         let query = search.trimmingCharacters(in: .whitespaces).lowercased()
@@ -41,18 +26,9 @@ struct HistoryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: $tab) {
-                ForEach(HistoryTab.allCases) { Text($0.rawValue).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, 14)
-            .padding(.top, 10)
             toolbar
             Divider()
-            if tab == .captured {
-                capturedList
-            } else if entries.isEmpty {
+            if entries.isEmpty {
                 placeholder("Nothing yet. Every sentence you improve shows up here.")
             } else if filtered.isEmpty {
                 placeholder("No match for “\(search)”.")
@@ -77,7 +53,7 @@ struct HistoryView: View {
                 .foregroundStyle(.secondary)
             TextField("Search your past sentences", text: $search)
                 .textFieldStyle(.plain)
-            Text("\(tab == .captured ? filteredCaptured.count : filtered.count)")
+            Text("\(filtered.count)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button {
@@ -94,57 +70,8 @@ struct HistoryView: View {
 
     private func reload() {
         entries = History.load()
-        captured = CaptureStore.load()
     }
 
-    @ViewBuilder
-    private var capturedList: some View {
-        if !KeystrokeCapture.shared.isEnabled {
-            placeholder("Capture is off. Turn on “Capture my typing” in the ⋯ menu.")
-        } else if captured.isEmpty {
-            placeholder("Nothing captured yet. Keep typing — sentences land here.")
-        } else if filteredCaptured.isEmpty {
-            placeholder("No match for “\(search)”.")
-        } else {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(filteredCaptured) { item in
-                        capturedRow(item)
-                        Divider()
-                    }
-                }
-            }
-        }
-    }
-
-    private func capturedRow(_ item: CapturedSentence) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(item.date, format: .dateTime.day().month().hour().minute())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(item.app)
-                    .font(.caption)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .background(Color.secondary.opacity(0.15))
-                    .clipShape(Capsule())
-                Spacer()
-                Button("Copy") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(item.text, forType: .string)
-                }
-                .buttonStyle(.link)
-            }
-            Text(item.text)
-                .font(.system(size: 14))
-                .textSelection(.enabled)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
 
     private func placeholder(_ text: String) -> some View {
         VStack {
