@@ -11,7 +11,7 @@ struct CodexDirectClient: RewriteProvider {
 
     private static let baseURL = "https://chatgpt.com/backend-api"
     private static let originator = "codex_cli_rs"
-    private static let userAgent = "codex_cli_rs/0.0.0 (Tich)"
+    private static let userAgent = "codex_cli_rs/0.0.0 (Tichit)"
     private static let toolName = "structured_response"
 
     func improve(text: String, tone: Tone) async throws -> Suggestion {

@@ -3,10 +3,17 @@ import Security
 
 /// Tiny wrapper around a single generic-password keychain item.
 enum Keychain {
-    private static let service = "dev.tich.gemini"
+    private static let service = "dev.tichit.gemini"
     private static let account = "api-key"
 
+    /// Falls back to the pre-rename service so an existing key keeps working.
+    private static let legacyService = "dev.tich.gemini"
+
     static func read() -> String? {
+        read(service: service) ?? read(service: legacyService)
+    }
+
+    private static func read(service: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

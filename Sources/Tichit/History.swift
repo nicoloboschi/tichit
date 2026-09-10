@@ -5,7 +5,7 @@ import Foundation
 enum History {
     private static let directory: URL = {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("Tich", isDirectory: true)
+        return base.appendingPathComponent("Tichit", isDirectory: true)
     }()
 
     static var fileURL: URL { directory.appendingPathComponent("history.jsonl") }

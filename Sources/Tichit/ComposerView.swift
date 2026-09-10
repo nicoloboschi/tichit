@@ -9,6 +9,8 @@ final class Composer: ObservableObject {
     @Published var error: String?
     @Published var isLoading = false
     @Published var copied = false
+    /// Drives the menu bar dot: grey idle, yellow working, green answer unread.
+    @Published private(set) var status: Status = .idle
     /// Codex answers in ~6-9s against Gemini's ~3s.
     @Published var slowProvider = false
 
@@ -30,6 +32,7 @@ final class Composer: ObservableObject {
         let viaCodex = Provider.resolved == .codex
         task?.cancel()
         isLoading = true
+        status = .working
         slowProvider = viaCodex
         error = nil
         copied = false
@@ -39,15 +42,22 @@ final class Composer: ObservableObject {
                 let suggestion = try await client.improve(text: text, tone: tone)
                 guard !Task.isCancelled else { return }
                 result = suggestion
+                status = .ready
                 History.append(original: text, suggestion: suggestion, tone: tone)
             } catch is CancellationError {
                 return
             } catch {
                 guard !Task.isCancelled else { return }
                 self.error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                status = .idle
             }
             isLoading = false
         }
+    }
+
+    /// The answer is on screen, so the badge goes back to neutral.
+    func markRead() {
+        if status == .ready { status = .idle }
     }
 
     func copyImproved() {
@@ -68,6 +78,7 @@ final class Composer: ObservableObject {
         error = nil
         isLoading = false
         copied = false
+        status = .idle
     }
 }
 
@@ -121,7 +132,7 @@ struct ComposerView: View {
 
     private var header: some View {
         HStack {
-            Text("Tich")
+            Text("Tichit")
                 .font(.headline)
             Spacer()
             Menu {
@@ -130,7 +141,7 @@ struct ComposerView: View {
                     .keyboardShortcut("y", modifiers: .command)
                 Button("Settings…") { SettingsWindow.show() }
                 Divider()
-                Button("Quit Tich") { NSApp.terminate(nil) }
+                Button("Quit Tichit") { NSApp.terminate(nil) }
             } label: {
                 Image(systemName: "ellipsis.circle")
             }

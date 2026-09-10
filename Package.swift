@@ -2,12 +2,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "Tich",
+    name: "Tichit",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "Tich",
-            path: "Sources/Tich"
+            name: "Tichit",
+            path: "Sources/Tichit"
+        ),
+        // Renders the .icns artwork from the same Logo code the app draws with.
+        .executableTarget(
+            name: "IconGen",
+            path: "Sources/IconGen",
+            sources: ["main.swift", "Logo.swift"]
         )
     ]
 )

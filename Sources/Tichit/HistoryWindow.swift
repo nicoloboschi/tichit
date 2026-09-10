@@ -172,7 +172,7 @@ enum HistoryWindow {
                 backing: .buffered,
                 defer: false
             )
-            w.title = "Tich History"
+            w.title = "Tichit History"
             w.contentView = NSHostingView(rootView: HistoryView())
             w.isReleasedWhenClosed = false
             w.center()

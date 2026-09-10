@@ -78,7 +78,7 @@ enum SettingsWindow {
                 backing: .buffered,
                 defer: false
             )
-            w.title = "Tich Settings"
+            w.title = "Tichit Settings"
             w.contentView = NSHostingView(rootView: SettingsView())
             w.isReleasedWhenClosed = false
             w.center()

@@ -1,60 +1,111 @@
-# Tich
+# Tichit
 
-A macOS menu bar app that turns your English into native-sounding English.
+A macOS menu bar app that turns what you write into natural, native-sounding English —
+and explains, in Italian, why it changed.
 
-Phase 1 (this): type or paste a sentence, get a natural rewrite plus a short list of
-what changed and why — meant to be used right before you hit send on an email.
+Built for a fluent-but-not-native speaker who wants the correction *and* the rule.
 
-Write in **English** and it is rewritten to sound native. Write in **Italian** and it is
-translated the way a native speaker would actually put it, with the word-for-word
-version shown alongside so you can see where idiomatic English departs from it.
-Either way you get a glossary of the words and expressions used, explained in Italian,
-and the reason for each change is written in Italian too.
+## What it does
 
-## Build
+Press **⌘⇧E** anywhere, type a sentence, press **↩**.
 
+- **Write in English** → it is rewritten to sound like a native wrote it.
+- **Write in Italian** → it is translated the way a native would actually put it, with
+  the word-for-word version shown alongside so you can see where idiomatic English
+  departs from a literal translation.
+
+Either way you get back:
+
+- the improved sentence, ready to copy (**⌘⇧C**)
+- an optional second phrasing
+- **what changed and why**, explained in Italian
+- a **glossary** of the words and expressions used — idioms, phrasal verbs,
+  collocations — with their Italian meaning and a note on any false friend
+
+Everything you improve is kept in a searchable history (**⌘Y**), so you can look back
+at the mistakes you keep making.
+
+### Example
+
+Input (Italian):
+
+> Ti faccio sapere appena ho novità, non vorrei farti perdere tempo.
+
+Output:
+
+> **Word for word** — I make you know as soon as I have news, I would not want to make you lose time.
+>
+> **In English** — I'll let you know as soon as I have an update. I don't want to waste your time.
+>
+> - `Ti faccio sapere` → `I'll let you know` — In inglese "far sapere" si traduce con
+>   "let (someone) know", non con "make you know" (calco errato da evitare).
+> - `farti perdere tempo` → `waste your time` — "Far perdere tempo a qualcuno" è
+>   un'espressione fissa: "to waste someone's time".
+
+## The menu bar dot
+
+The icon carries a status dot: **grey** idle, **yellow** while it is thinking,
+**green** when an answer is waiting for you. A notification fires when the answer
+lands while you are looking at something else — click it to jump straight to the text.
+
+## Install
+
+Download the `.dmg` from [Releases](../../releases), open it, drag Tichit to
+Applications. The app is unsigned, so the first launch needs a right-click → Open.
+
+Or build it yourself — no Xcode required, just the Swift toolchain:
+
+```sh
+./scripts/build-app.sh --install   # -> /Applications/Tichit.app
 ```
-./scripts/build-app.sh            # -> build/Tich.app
-./scripts/build-app.sh --install  # -> /Applications/Tich.app, quitting the old copy
-```
 
-No Xcode needed, just the Swift toolchain.
-
-To start it automatically, add it in System Settings → General → Login Items, or:
-
-```
-osascript -e 'tell application "System Events" to make login item at end \
-  with properties {path:"/Applications/Tich.app", hidden:true}'
-```
+To start it automatically, add it in System Settings → General → Login Items.
 
 ## Setup
 
 Two ways to power it, chosen in Settings (default **Automatic**):
 
 - **Codex subscription** — reuses the OAuth login the Codex CLI already stores in
-  `~/.codex/auth.json` to call `gpt-5.6-luna` on the Codex backend directly. No API
-  key, nothing to pay per call, ~6-9s. Tokens are refreshed against the OAuth
-  endpoint when the JWT `exp` claim is near and written back to `auth.json`, so the
-  CLI and this app stay in sync. Auth and request shape are ported from Hindsight's
-  `codex_auth.py` / `codex_llm.py`.
-- **Gemini API key** — `gemini-3.7-flash` over HTTPS, ~3s. Get a key at
-  https://aistudio.google.com/apikey; it is stored in the macOS Keychain.
-  For `swift run` you can set `GEMINI_API_KEY` instead.
+  `~/.codex/auth.json` to call `gpt-5.6-luna` directly. No API key, nothing to pay
+  per call, ~6-9s. Tokens are refreshed against the OAuth endpoint when the JWT
+  `exp` claim is near and written back to `auth.json`, so the CLI and this app
+  stay in sync.
+- **Gemini API key** — `gemini-3.7-flash`, ~3s. Get a key at
+  [aistudio.google.com/apikey](https://aistudio.google.com/apikey); it is stored in
+  the macOS Keychain.
 
 Automatic prefers Codex when it is signed in and falls back to Gemini. Both providers
-are sent the identical brief (`Prompts.system`), so switching changes the model, not
-the behaviour.
+receive the identical brief (`Prompts.swift`), so switching changes the model, not the
+behaviour.
 
-## Use
+## Keys
 
-- Click the menu bar icon, or press **⌘⇧E** from anywhere.
-- Type, pick a tone, press **↩** to improve. **⇧↩** inserts a line break.
-- **⌘⇧C** copies the improved text.
+| Key | Does |
+| --- | --- |
+| `⌘⇧E` | Open from anywhere |
+| `↩` | Improve |
+| `⇧↩` | New line |
+| `⌘⇧C` | Copy the improved text |
+| `⌘Y` | History |
 
-Everything stays on this machine: rewrites are logged to
-`~/Library/Application Support/Tich/history.jsonl`. Nothing is sent anywhere until
-you ask for an improvement. Delete that file to wipe it.
+## Privacy
 
-Structured JSON output on both providers: `responseSchema` on Gemini, and on Codex a
-single forced function tool whose parameters are the schema, so the backend does
-constrained decoding and the answer arrives as tool-call arguments.
+Everything stays on your machine. History lives in
+`~/Library/Application Support/Tichit/history.jsonl` — plain JSONL, delete it to wipe
+it. Text is sent to your chosen provider only when you ask for an improvement.
+
+## Layout
+
+```
+Sources/Tichit/
+  AppDelegate.swift        menu bar item, popover, global hotkey, notifications
+  ComposerView.swift       the popover UI and its view model
+  SentenceEditor.swift     NSTextView wrapper: ↩ submits, ⇧↩ breaks lines
+  HistoryWindow.swift      searchable history
+  SettingsWindow.swift     provider choice and API key
+  Prompts.swift            the single rewrite brief, shared by both providers
+  GeminiClient.swift       Gemini provider
+  CodexDirectClient.swift  Codex provider (forced-function-tool structured output)
+  CodexAuth.swift          Codex OAuth: expiry, refresh, write-back
+  Logo.swift               the mark, drawn in code, and the status dot
+```
