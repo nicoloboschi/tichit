@@ -9,13 +9,13 @@ final class Composer: ObservableObject {
     @Published var error: String?
     @Published var isLoading = false
     @Published var copied = false
-    /// Codex runs a full agent loop, so it is far slower than a direct API call.
+    /// Codex answers in ~6-9s against Gemini's ~3s.
     @Published var slowProvider = false
 
     private var task: Task<Void, Never>?
 
     private var client: RewriteProvider {
-        Provider.resolved == .codex ? CodexClient() : GeminiClient()
+        Provider.resolved == .codex ? CodexDirectClient() : GeminiClient()
     }
 
     var canSubmit: Bool {
@@ -152,7 +152,7 @@ struct ComposerView: View {
             if composer.isLoading {
                 ProgressView().controlSize(.small)
                 if composer.slowProvider {
-                    Text("Codex — this takes ~30s")
+                    Text("Codex — a few seconds")
                         .font(.system(size: 10))
                         .foregroundStyle(.tertiary)
                 }

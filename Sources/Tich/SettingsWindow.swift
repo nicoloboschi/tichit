@@ -56,12 +56,12 @@ struct SettingsView: View {
 
     private var providerStatus: String {
         switch Provider.resolved {
-        case .codex where CodexCLI.isAvailable:
-            return "Using the Codex CLI with your existing subscription login — no API key needed. Slower (~30s), since it runs a full agent turn."
+        case .codex where CodexAuth.isSignedIn:
+            return "Using your Codex subscription login from ~/.codex/auth.json — no API key needed."
         case .codex:
-            return "Codex CLI not found or not logged in. Install it and run `codex login`."
+            return "Not signed in to Codex. Run `codex login` in a terminal."
         default:
-            return "Using the Gemini API with the key below. Fast (~3s)."
+            return "Using the Gemini API with the key below."
         }
     }
 }

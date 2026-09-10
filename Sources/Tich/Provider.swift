@@ -20,7 +20,7 @@ enum Provider: String, CaseIterable, Identifiable {
     /// Prefer Codex when it is signed in: no key to manage, nothing to pay per call.
     static var resolved: Provider {
         switch current {
-        case .auto: return CodexCLI.isAvailable ? .codex : .gemini
+        case .auto: return CodexAuth.isSignedIn ? .codex : .gemini
         case let explicit: return explicit
         }
     }

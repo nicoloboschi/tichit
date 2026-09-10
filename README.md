@@ -24,10 +24,12 @@ Copy it to `/Applications` when you like it. No Xcode needed, just the Swift too
 
 Two ways to power it, chosen in Settings (default **Automatic**):
 
-- **Codex subscription** — if the Codex CLI is installed and logged in
-  (`~/.codex/auth.json`), rewrites run through `codex exec` with `gpt-5.6-luna`.
-  No API key, nothing to pay per call. Slower: ~13-30s, because each rewrite is a
-  full agent turn (~13k tokens of overhead).
+- **Codex subscription** — reuses the OAuth login the Codex CLI already stores in
+  `~/.codex/auth.json` to call `gpt-5.6-luna` on the Codex backend directly. No API
+  key, nothing to pay per call, ~6-9s. Tokens are refreshed against the OAuth
+  endpoint when the JWT `exp` claim is near and written back to `auth.json`, so the
+  CLI and this app stay in sync. Auth and request shape are ported from Hindsight's
+  `codex_auth.py` / `codex_llm.py`.
 - **Gemini API key** — `gemini-3.7-flash` over HTTPS, ~3s. Get a key at
   https://aistudio.google.com/apikey; it is stored in the macOS Keychain.
   For `swift run` you can set `GEMINI_API_KEY` instead.
@@ -46,5 +48,6 @@ Everything stays on this machine: rewrites are logged to
 `~/Library/Application Support/Tich/history.jsonl`. Nothing is sent anywhere until
 you ask for an improvement. Delete that file to wipe it.
 
-Structured JSON output on both providers: `responseSchema` on Gemini,
-`--output-schema` on Codex.
+Structured JSON output on both providers: `responseSchema` on Gemini, and on Codex a
+single forced function tool whose parameters are the schema, so the backend does
+constrained decoding and the answer arrives as tool-call arguments.
