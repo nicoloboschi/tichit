@@ -50,6 +50,33 @@ The icon carries a status dot: **grey** idle, **yellow** while it is thinking,
 **green** when an answer is waiting for you. A notification fires when the answer
 lands while you are looking at something else — click it to jump straight to the text.
 
+## Capture (optional)
+
+Turn on **Capture my typing** in the ⋯ menu to record the sentences you write, so you
+can look back at the mistakes you make in the wild rather than only the ones you
+thought to check.
+
+macOS will ask for Accessibility permission; capture starts by itself the moment you
+grant it. A red dot in the popover shows while it is live.
+
+Capture is an **allowlist** — only **Brave Browser** and **Slack**
+(`KeystrokeCapture.capturedApps`). Every other app is ignored, including any installed
+later. Within those two, also never recorded:
+
+- anything typed while macOS secure input is on (password fields)
+- ⌘/⌃/⌥ shortcuts
+- anything that doesn't look like prose: under 12 chars, fewer than 3 words,
+  under 55% letters, or starting with a URL or path
+
+Sentences split on `.`/`!`/`?`, after 3s idle, or when you switch app. Return is a
+boundary only in Slack, where it sends the message; in Brave it is treated as a line
+break so a paragraph typed across lines stays one sentence. Everything is stored
+locally in `~/Library/Application Support/Tichit/captured.jsonl`.
+
+> **Note:** the app is ad-hoc signed, so its code hash changes on every rebuild and
+> macOS drops the Accessibility grant. If capture stops after you rebuild, remove
+> Tichit under Privacy & Security → Accessibility and add it again.
+
 ## Install
 
 Download the `.dmg` from [Releases](../../releases), open it, drag Tichit to
@@ -109,5 +136,6 @@ Sources/Tichit/
   GeminiClient.swift       Gemini provider
   CodexDirectClient.swift  Codex provider (forced-function-tool structured output)
   CodexAuth.swift          Codex OAuth: expiry, refresh, write-back
+  Capture.swift            optional system-wide typing capture (Brave + Slack)
   Logo.swift               the mark, drawn in code, and the status dot
 ```

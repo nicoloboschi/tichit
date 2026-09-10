@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         registerHotKey()
         observeStatus()
+        KeystrokeCapture.shared.startIfEnabled()
         requestNotificationPermission()
 
         // Only nag for a key when there is no working provider at all.

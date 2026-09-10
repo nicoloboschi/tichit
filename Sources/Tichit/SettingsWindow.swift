@@ -5,6 +5,7 @@ struct SettingsView: View {
     @State private var apiKey = Keychain.read() ?? ""
     @State private var saved = false
     @State private var provider = Provider.current
+    @ObservedObject private var capture = KeystrokeCapture.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -45,6 +46,20 @@ struct SettingsView: View {
                 .keyboardShortcut(.return)
             }
             Divider()
+
+            Text("Capture typing")
+                .font(.headline)
+            Text(captureStatus)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if capture.isEnabled, !capture.isRunning {
+                Button("Open Accessibility settings") {
+                    capture.openAccessibilitySettings()
+                }
+            }
+
+            Divider()
             Text("History: \(History.fileURL.path)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -52,6 +67,16 @@ struct SettingsView: View {
         }
         .padding(18)
         .frame(width: 440)
+    }
+
+    private var captureStatus: String {
+        if !capture.isEnabled {
+            return "Off. Turn on “Capture my typing” in the ⋯ menu to record the sentences you write in Brave and Slack."
+        }
+        if capture.isRunning {
+            return "On — recording sentences typed in Brave and Slack. Nothing else is watched."
+        }
+        return "Waiting for Accessibility permission. Add Tichit under Privacy & Security → Accessibility; capture starts by itself once you do."
     }
 
     private var providerStatus: String {
