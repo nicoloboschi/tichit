@@ -1,3 +1,5 @@
+<img src="docs/icon.png" width="120" align="right" alt="Tichit">
+
 # Tichit
 
 A macOS menu bar app that turns what you write into natural, native-sounding English —
