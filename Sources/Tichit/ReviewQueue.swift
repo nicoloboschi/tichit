@@ -124,7 +124,8 @@ final class ReviewQueue: ObservableObject {
                 ? CodexDirectClient()
                 : GeminiClient()
 
-            guard let suggestion = try? await client.improve(text: sentence.text, tone: .neutral) else {
+            let tone = ReviewSettings.tone
+            guard let suggestion = try? await client.improve(text: sentence.text, tone: tone) else {
                 return
             }
 

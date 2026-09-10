@@ -1,7 +1,8 @@
 import Foundation
 
 enum Tone: String, CaseIterable, Identifiable {
-    case neutral = "Neutral"
+    case asWritten = "As written"
+    case casual = "Casual"
     case formal = "Formal"
     case friendly = "Friendly"
     case concise = "Concise"
@@ -10,10 +11,19 @@ enum Tone: String, CaseIterable, Identifiable {
 
     var instruction: String {
         switch self {
-        case .neutral: return "Keep the register neutral and professional."
-        case .formal: return "Make it formal and polished, suitable for a business email."
-        case .friendly: return "Make it warm and friendly, the way a colleague would write."
-        case .concise: return "Make it as short as possible without losing meaning."
+        case .asWritten:
+            return "Keep the register exactly as the author wrote it. Do not make it "
+                + "more formal, longer or more explicit: a quick chat message stays a "
+                + "quick chat message. Fix only what is wrong or unnatural."
+        case .casual:
+            return "Make it sound like a relaxed message to a colleague: contractions, "
+                + "everyday words, no business-letter phrasing."
+        case .formal:
+            return "Make it formal and polished, suitable for a business email."
+        case .friendly:
+            return "Make it warm and friendly, the way a colleague would write."
+        case .concise:
+            return "Make it as short as possible without losing meaning."
         }
     }
 }

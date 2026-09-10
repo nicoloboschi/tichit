@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var saved = false
     @State private var provider = Provider.current
     @ObservedObject private var capture = KeystrokeCapture.shared
+    @State private var reviewTone = ReviewSettings.tone
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -50,6 +51,20 @@ struct SettingsView: View {
             Text("Capture typing")
                 .font(.headline)
             Toggle("Capture what I write in Brave and Slack", isOn: $capture.isEnabled)
+
+            HStack {
+                Text("Correct captured text as:")
+                Picker("", selection: $reviewTone) {
+                    ForEach(Tone.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .labelsHidden()
+                .fixedSize()
+                .onChange(of: reviewTone) { _, new in ReviewSettings.tone = new }
+            }
+            Text(toneHint)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             Text(captureStatus)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -74,6 +89,12 @@ struct SettingsView: View {
         }
         .padding(18)
         .frame(width: 440)
+    }
+
+    private var toneHint: String {
+        reviewTone == .asWritten
+            ? "Keeps your own register — a quick Slack line stays a quick Slack line, and only real mistakes are flagged."
+            : "Captured sentences are judged against this register, so you will be told when they do not match it."
     }
 
     private var captureStatus: String {

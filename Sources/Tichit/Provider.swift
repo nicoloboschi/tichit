@@ -35,6 +35,20 @@ enum Provider: String, CaseIterable, Identifiable {
     }
 }
 
+/// Tone used when reviewing captured sentences. Separate from the composer's picker:
+/// what you dash off in Slack should not be judged against a business-email standard.
+enum ReviewSettings {
+    static var tone: Tone {
+        get {
+            UserDefaults.standard.string(forKey: "captureTone").flatMap(Tone.init(rawValue:))
+                ?? .asWritten
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "captureTone")
+        }
+    }
+}
+
 protocol RewriteProvider {
     func improve(text: String, tone: Tone) async throws -> Suggestion
 }

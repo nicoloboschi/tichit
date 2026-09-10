@@ -64,6 +64,11 @@ tab and fire a notification. Natural English, casual shorthand ("the deploy is d
 "on staging") and pure matters of taste are reviewed and dropped, so you are
 interrupted for lessons, not for style opinions.
 
+**Tone** (Settings → Correct captured text as) decides the register captured sentences
+are judged against. The default, **As written**, keeps your own register — a quick
+Slack line stays a quick Slack line, and only real mistakes are flagged. Pick `Formal`
+instead and you will be told every time a chat message is not a business email.
+
 Two registries, kept separate so a re-review never loses the original:
 
 | File | Holds |

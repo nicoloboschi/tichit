@@ -4,7 +4,7 @@ import SwiftUI
 @MainActor
 final class Composer: ObservableObject {
     @Published var input = ""
-    @Published var tone: Tone = .neutral
+    @Published var tone: Tone = .asWritten
     @Published var result: Suggestion?
     @Published var error: String?
     @Published var isLoading = false
