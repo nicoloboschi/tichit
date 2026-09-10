@@ -16,6 +16,11 @@ enum History {
         let original: String
         let improved: String
         let notes: [Note]
+        let glossary: [GlossaryItem]?
+        let literal: String?
+        let sourceLanguage: String?
+
+        var wasItalian: Bool { sourceLanguage == "it" }
 
         var id: String { ISO8601DateFormatter().string(from: date) + original }
     }
@@ -49,7 +54,7 @@ enum History {
     }
 
     static func append(original: String, suggestion: Suggestion, tone: Tone) {
-        let entry: [String: Any] = [
+        var entry: [String: Any] = [
             "date": ISO8601DateFormatter().string(from: Date()),
             "tone": tone.rawValue,
             "original": original,
@@ -57,7 +62,16 @@ enum History {
             "notes": suggestion.notes.map {
                 ["original": $0.original, "suggestion": $0.suggestion, "reason": $0.reason]
             },
+            "glossary": (suggestion.glossary ?? []).map { item -> [String: Any] in
+                var dict: [String: Any] = ["term": item.term, "italian": item.italian]
+                if let note = item.note { dict["note"] = note }
+                return dict
+            },
+            "sourceLanguage": suggestion.sourceLanguage ?? "en",
         ]
+        if let literal = suggestion.literal {
+            entry["literal"] = literal
+        }
         guard let data = try? JSONSerialization.data(withJSONObject: entry) else { return }
         var line = data
         line.append(0x0A)

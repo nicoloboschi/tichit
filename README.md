@@ -5,6 +5,12 @@ A macOS menu bar app that turns your English into native-sounding English.
 Phase 1 (this): type or paste a sentence, get a natural rewrite plus a short list of
 what changed and why — meant to be used right before you hit send on an email.
 
+Write in **English** and it is rewritten to sound native. Write in **Italian** and it is
+translated the way a native speaker would actually put it, with the word-for-word
+version shown alongside so you can see where idiomatic English departs from it.
+Either way you get a glossary of the words and expressions used, explained in Italian,
+and the reason for each change is written in Italian too.
+
 Phase 2 (now): passively capture everything you type, one sentence per row, so the
 app can later surface the mistakes you keep repeating.
 

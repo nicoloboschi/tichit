@@ -26,10 +26,26 @@ struct Note: Codable, Identifiable {
     var id: String { original + suggestion }
 }
 
-struct Suggestion: Decodable {
+/// One word or expression from the rewrite, explained in Italian.
+struct GlossaryItem: Codable, Identifiable {
+    let term: String
+    let italian: String
+    let note: String?
+
+    var id: String { term + italian }
+}
+
+struct Suggestion: Codable {
     let improved: String
     let notes: [Note]
     let alternative: String?
+    let glossary: [GlossaryItem]?
+    /// Set only when the input was Italian: the word-for-word English, for contrast.
+    let literal: String?
+    /// "en", "it" or "mixed".
+    let sourceLanguage: String?
+
+    var wasItalian: Bool { sourceLanguage == "it" }
 }
 
 enum GeminiError: LocalizedError {
@@ -53,18 +69,32 @@ struct GeminiClient {
     var model = "gemini-3.7-flash"
 
     private static let systemPrompt = """
-    You are an English writing coach for a fluent but non-native speaker (Italian first language).
-    Rewrite the user's text so it sounds like natural, idiomatic English written by a native speaker.
+    You are an English writing coach for an Italian speaker. The input may be English,
+    Italian, or a mix. Set `sourceLanguage` to "en", "it" or "mixed" accordingly.
+
+    If the input is ENGLISH: rewrite it so it sounds like natural, idiomatic English
+    written by a native speaker. Set `literal` to null.
+
+    If the input is ITALIAN: translate it into the English a native speaker would
+    actually write in that situation — NOT a word-for-word translation. Then set
+    `literal` to the word-for-word English rendering of the Italian, so the learner can
+    see the gap between the two, and use `notes` to explain where and why the natural
+    version departs from it (false friends, calques, idioms, register, verb patterns).
 
     Rules:
     - Preserve the author's meaning, intent and level of detail. Never invent facts.
-    - Preserve the original language register unless the requested tone says otherwise.
-    - Fix grammar, article usage, prepositions, verb tenses, word order and calques from Italian.
-    - Prefer the phrasing a native speaker would actually use over a literal correction.
-    - If the text is already good, return it unchanged and say so with an empty notes list.
-    - Reply with the rewritten text only in `improved` — no preamble, no quotes.
-    - In `notes`, list at most 5 of the most instructive changes, each with the original
-      fragment, the replacement, and a short reason the learner can generalise from.
+    - Preserve the register unless the requested tone says otherwise.
+    - Fix grammar, articles, prepositions, tenses, word order and calques from Italian.
+    - `improved` holds the final English only — no preamble, no quotes.
+    - `notes`: at most 5 of the most instructive changes. Each has the original
+      fragment, the replacement, and a `reason` WRITTEN IN ITALIAN explaining the rule
+      so the learner can generalise from it.
+    - `glossary`: every word or expression in `improved` that is worth learning —
+      idioms, phrasal verbs, collocations, and any word whose sense is not obvious.
+      `term` is the English word or expression exactly as it appears in `improved`,
+      `italian` is its meaning in Italian IN THIS CONTEXT, and `note` is an optional
+      short Italian remark on usage, register or a false friend to avoid. Skip trivial
+      function words (the, and, is). Aim for the 3-8 items that actually teach something.
     - `alternative` is an optional second phrasing of the whole text, or null.
     """
 
@@ -85,8 +115,22 @@ struct GeminiClient {
                 ],
             ],
             "alternative": ["type": "STRING", "nullable": true],
+            "literal": ["type": "STRING", "nullable": true],
+            "sourceLanguage": ["type": "STRING", "enum": ["en", "it", "mixed"]],
+            "glossary": [
+                "type": "ARRAY",
+                "items": [
+                    "type": "OBJECT",
+                    "properties": [
+                        "term": ["type": "STRING"],
+                        "italian": ["type": "STRING"],
+                        "note": ["type": "STRING", "nullable": true],
+                    ],
+                    "required": ["term", "italian"],
+                ],
+            ],
         ],
-        "required": ["improved", "notes"],
+        "required": ["improved", "notes", "glossary", "sourceLanguage"],
     ]}
 
     func improve(text: String, tone: Tone) async throws -> Suggestion {

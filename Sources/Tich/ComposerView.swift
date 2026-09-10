@@ -168,9 +168,23 @@ struct ComposerView: View {
     @ViewBuilder
     private func resultBody(_ result: Suggestion) -> some View {
         VStack(alignment: .leading, spacing: 10) {
+            if let literal = result.literal, !literal.isEmpty, result.wasItalian {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Word for word")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(literal)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .italic()
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("Improved")
+                    Text(result.wasItalian ? "In English" : "Improved")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -207,9 +221,36 @@ struct ComposerView: View {
                 }
             }
 
+            if let glossary = result.glossary, !glossary.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Parole e modi di dire")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    ForEach(glossary) { item in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text(item.term)
+                                    .font(.system(size: 13, weight: .medium))
+                                Text("=")
+                                    .foregroundStyle(.tertiary)
+                                Text(item.italian)
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(.secondary)
+                            }
+                            if let note = item.note, !note.isEmpty {
+                                Text(note)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+
             if !result.notes.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("What changed")
+                    Text(result.wasItalian ? "Perché non è letterale" : "What changed")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                     ForEach(result.notes) { note in

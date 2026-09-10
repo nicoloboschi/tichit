@@ -27,6 +27,10 @@ struct HistoryView: View {
         return entries.filter {
             $0.original.lowercased().contains(query)
                 || $0.improved.lowercased().contains(query)
+                || ($0.glossary ?? []).contains { item in
+                    item.term.lowercased().contains(query)
+                        || item.italian.lowercased().contains(query)
+                }
                 || $0.notes.contains { note in
                     note.original.lowercased().contains(query)
                         || note.suggestion.lowercased().contains(query)
@@ -175,6 +179,7 @@ struct HistoryView: View {
             Text(entry.original)
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
+                .italic(entry.wasItalian)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -182,6 +187,24 @@ struct HistoryView: View {
                 .font(.system(size: 15, weight: .medium))
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if let glossary = entry.glossary, !glossary.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(glossary) { item in
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text(item.term)
+                                .font(.system(size: 12, weight: .medium))
+                            Text("=")
+                                .foregroundStyle(.tertiary)
+                            Text(item.italian)
+                                .foregroundStyle(.secondary)
+                                .font(.system(size: 12))
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(.top, 2)
+            }
 
             if !entry.notes.isEmpty {
                 VStack(alignment: .leading, spacing: 3) {
