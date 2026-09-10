@@ -14,11 +14,18 @@ and the reason for each change is written in Italian too.
 ## Build
 
 ```
-./scripts/build-app.sh          # -> build/Tich.app
-open build/Tich.app
+./scripts/build-app.sh            # -> build/Tich.app
+./scripts/build-app.sh --install  # -> /Applications/Tich.app, quitting the old copy
 ```
 
-Copy it to `/Applications` when you like it. No Xcode needed, just the Swift toolchain.
+No Xcode needed, just the Swift toolchain.
+
+To start it automatically, add it in System Settings → General → Login Items, or:
+
+```
+osascript -e 'tell application "System Events" to make login item at end \
+  with properties {path:"/Applications/Tich.app", hidden:true}'
+```
 
 ## Setup
 

@@ -4,7 +4,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-CONFIG="${1:-release}"
+CONFIG="release"
+INSTALL=""
+for arg in "$@"; do
+    case "$arg" in
+        --install) INSTALL=1 ;;
+        debug|release) CONFIG="$arg" ;;
+    esac
+done
 APP="build/Tich.app"
 
 swift build -c "$CONFIG"
@@ -37,3 +44,12 @@ PLIST
 codesign --force --sign - "$APP" >/dev/null 2>&1 || echo "warning: ad-hoc codesign failed"
 
 echo "Built $APP"
+
+if [ -n "$INSTALL" ]; then
+    # Quit the running copy first: replacing a bundle underneath a live process
+    # leaves it running from a deleted path.
+    pkill -f "Tich.app/Contents/MacOS/Tich" 2>/dev/null || true
+    rm -rf /Applications/Tich.app
+    cp -R "$APP" /Applications/Tich.app
+    echo "Installed /Applications/Tich.app"
+fi
