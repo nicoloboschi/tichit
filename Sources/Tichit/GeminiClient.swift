@@ -44,6 +44,8 @@ struct Suggestion: Codable {
     let literal: String?
     /// "en", "it" or "mixed".
     let sourceLanguage: String?
+    /// Whether the mistakes here are worth interrupting the user for.
+    let worthReporting: Bool?
 
     var wasItalian: Bool { sourceLanguage == "it" }
 }
@@ -87,6 +89,7 @@ struct GeminiClient: RewriteProvider {
             "alternative": ["type": "STRING", "nullable": true],
             "literal": ["type": "STRING", "nullable": true],
             "sourceLanguage": ["type": "STRING", "enum": ["en", "it", "mixed"]],
+            "worthReporting": ["type": "BOOLEAN"],
             "glossary": [
                 "type": "ARRAY",
                 "items": [
@@ -100,7 +103,7 @@ struct GeminiClient: RewriteProvider {
                 ],
             ],
         ],
-        "required": ["improved", "notes", "glossary", "sourceLanguage"],
+        "required": ["improved", "notes", "glossary", "sourceLanguage", "worthReporting"],
     ]}
 
     func improve(text: String, tone: Tone) async throws -> Suggestion {

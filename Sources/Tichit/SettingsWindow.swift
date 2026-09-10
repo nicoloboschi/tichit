@@ -49,6 +49,7 @@ struct SettingsView: View {
 
             Text("Capture typing")
                 .font(.headline)
+            Toggle("Capture what I write in Brave and Slack", isOn: $capture.isEnabled)
             Text(captureStatus)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -71,7 +72,7 @@ struct SettingsView: View {
 
     private var captureStatus: String {
         if !capture.isEnabled {
-            return "Off. Turn on “Capture my typing” in the ⋯ menu to record the sentences you write in Brave and Slack."
+            return "Off. Each captured sentence is reviewed automatically, and you are notified only when something is worth correcting."
         }
         if capture.isRunning {
             return "On — recording sentences typed in Brave and Slack. Nothing else is watched."

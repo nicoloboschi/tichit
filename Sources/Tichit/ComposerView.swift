@@ -84,12 +84,9 @@ final class Composer: ObservableObject {
 
 struct ComposerView: View {
     @ObservedObject var composer: Composer
-    @ObservedObject private var capture = KeystrokeCapture.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            header
-
             SentenceEditor(text: $composer.input) { composer.improve() }
                 .frame(height: 84)
                 .background(Color(nsColor: .textBackgroundColor))
@@ -124,42 +121,12 @@ struct ComposerView: View {
                 ScrollView {
                     resultBody(result)
                 }
-                .frame(minHeight: 260, maxHeight: 720)
+                .frame(minHeight: 240, maxHeight: 560)
             }
         }
         .padding(14)
-        .frame(width: 680)
     }
 
-    private var header: some View {
-        HStack {
-            Text("Tichit")
-                .font(.headline)
-            if capture.isRunning {
-                Image(systemName: "record.circle")
-                    .foregroundStyle(.red)
-                    .help("Capturing your typing in Brave and Slack. Turn it off in the ⋯ menu.")
-            } else if capture.awaitingPermission {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                    .help("Waiting for Accessibility permission.")
-            }
-            Spacer()
-            Menu {
-                Button("Clear") { composer.reset() }
-                Toggle("Capture my typing", isOn: $capture.isEnabled)
-                Button("History…") { HistoryWindow.show() }
-                    .keyboardShortcut("y", modifiers: .command)
-                Button("Settings…") { SettingsWindow.show() }
-                Divider()
-                Button("Quit Tichit") { NSApp.terminate(nil) }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-            }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
-        }
-    }
 
     private var controls: some View {
         HStack(spacing: 8) {

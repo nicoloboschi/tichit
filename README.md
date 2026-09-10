@@ -9,6 +9,8 @@ Built for a fluent-but-not-native speaker who wants the correction *and* the rul
 
 ## What it does
 
+The popover has three tabs — **Improve**, **Captured**, **History**.
+
 Press **⌘⇧E** anywhere, type a sentence, press **↩**.
 
 - **Write in English** → it is rewritten to sound like a native wrote it.
@@ -52,9 +54,22 @@ lands while you are looking at something else — click it to jump straight to t
 
 ## Capture (optional)
 
-Turn on **Capture my typing** in the ⋯ menu to record the sentences you write, so you
-can look back at the mistakes you make in the wild rather than only the ones you
-thought to check.
+Turn on **Capture my typing** in Settings to record the sentences you write, so you
+see the mistakes you make in the wild rather than only the ones you thought to check.
+
+Each captured sentence is sent for review automatically. The model decides in the same
+pass whether the sentence is actually **worth correcting** — a grammar error, a calque
+from Italian, an unnatural collocation — and only then does it reach the **Captured**
+tab and fire a notification. Natural English, casual shorthand ("the deploy is done",
+"on staging") and pure matters of taste are reviewed and dropped, so you are
+interrupted for lessons, not for style opinions.
+
+Two registries, kept separate so a re-review never loses the original:
+
+| File | Holds |
+| --- | --- |
+| `captured.jsonl` | every raw sentence, exactly as typed |
+| `reviews.jsonl` | the model's verdict on each: rewrite, notes, worth-reporting |
 
 macOS will ask for Accessibility permission; capture starts by itself the moment you
 grant it. A red dot in the popover shows while it is live.
@@ -136,6 +151,9 @@ Sources/Tichit/
   GeminiClient.swift       Gemini provider
   CodexDirectClient.swift  Codex provider (forced-function-tool structured output)
   CodexAuth.swift          Codex OAuth: expiry, refresh, write-back
+  RootView.swift           the tabbed shell: Improve / Captured / History
   Capture.swift            optional system-wide typing capture (Brave + Slack)
+  ReviewQueue.swift        reviews captured sentences serially, decides what to flag
+  CapturedView.swift       the reviewed captures, flagged ones first
   Logo.swift               the mark, drawn in code, and the status dot
 ```

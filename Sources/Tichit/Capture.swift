@@ -322,7 +322,9 @@ final class KeystrokeCapture: ObservableObject {
         guard Self.looksLikeProse(text) else { return }
 
         let app = NSWorkspace.shared.frontmostApplication?.localizedName ?? bufferApp
-        CaptureStore.append(CapturedSentence(date: Date(), app: app, text: text))
+        let sentence = CapturedSentence(date: Date(), app: app, text: text)
+        CaptureStore.append(sentence)
+        ReviewQueue.shared.enqueue(sentence)
     }
 
     /// Keeps sentences, drops fragments, tokens, paths and anything credential-shaped.

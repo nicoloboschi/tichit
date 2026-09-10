@@ -23,12 +23,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(
-            rootView: ComposerView(composer: composer)
+            rootView: RootView(composer: composer)
         )
 
         registerHotKey()
         observeStatus()
         KeystrokeCapture.shared.startIfEnabled()
+        observeReviews()
         requestNotificationPermission()
 
         // Only nag for a key when there is no working provider at all.
@@ -63,6 +64,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func observeReviews() {
+        ReviewQueue.shared.onNotable = { [weak self] review in
+            self?.notifyNotable(review)
+        }
+        // Anything captured while the app was closed still deserves a look.
+        ReviewQueue.shared.enqueueBacklog()
+    }
+
+    private func notifyNotable(_ review: Review) {
+        let content = UNMutableNotificationContent()
+        content.title = "Better English"
+        content.subtitle = review.original
+        content.body = review.improved
+        content.sound = nil
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString, content: content, trigger: nil
+        )
+        Task { try? await UNUserNotificationCenter.current().add(request) }
     }
 
     private func requestNotificationPermission() {
@@ -144,7 +166,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let finish = UncheckedSendable(completionHandler)
+        let capturedTab = response.notification.request.content.title == "Better English"
         Task { @MainActor in
+            if capturedTab { Tabs.shared.selected = .captured }
             self.togglePopoverFromNotification()
             finish.value()
         }

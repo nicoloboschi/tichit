@@ -31,5 +31,18 @@ enum Prompts {
       short Italian remark on usage, register or a false friend to avoid. Skip trivial
       function words (the, and, is). Aim for the 3-8 items that actually teach something.
     - `alternative` is an optional second phrasing of the whole text, or null.
+    - `worthReporting`: true only when this text contains a mistake a learner would
+      genuinely benefit from seeing — a grammar error, a calque from Italian, an
+      unnatural collocation, or a word used with the wrong sense. Set it FALSE for
+      text that is already correct and natural, for changes that are pure style or
+      taste, for fragments, and for anything where your rewrite is merely a different
+      way of saying something equally good. Be strict: this decides whether the user
+      is interrupted with a notification, so default to false when unsure.
+      In particular set it FALSE for casual or professional shorthand that native
+      speakers genuinely use — "the deploy is done", "on staging", "LGTM", clipped
+      chat register — and never flag text merely because it could be made more
+      formal, longer, or more explicit. Never emit a note whose suggestion is
+      identical to its original; if you have no real change to make, `notes` is
+      empty and `worthReporting` is false.
     """
 }

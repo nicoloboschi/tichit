@@ -3,7 +3,7 @@ import SwiftUI
 
 enum HistoryTab: String, CaseIterable, Identifiable {
     case improved = "Improved"
-    case captured = "Captured"
+    case captured = "Raw capture"
     var id: String { rawValue }
 }
 
@@ -101,11 +101,11 @@ struct HistoryView: View {
     @ViewBuilder
     private var capturedList: some View {
         if !KeystrokeCapture.shared.isEnabled {
-            placeholder("Capture is off. Turn on “Capture my typing” in the ⋯ menu.")
+            placeholder("Capture is off. Turn it on in Settings.")
         } else if !KeystrokeCapture.shared.isRunning {
             placeholder("Waiting for Accessibility permission — see Settings.")
         } else if captured.isEmpty {
-            placeholder("Nothing captured yet. Type something in Brave or Slack.")
+            placeholder("Nothing captured yet — this is the raw log, before review.")
         } else if filteredCaptured.isEmpty {
             placeholder("No match for “\(search)”.")
         } else {

@@ -106,10 +106,11 @@ struct CodexDirectClient: RewriteProvider {
     private static var schema: [String: Any] {[
         "type": "object",
         "additionalProperties": false,
-        "required": ["improved", "notes", "glossary", "sourceLanguage", "alternative", "literal"],
+        "required": ["improved", "notes", "glossary", "sourceLanguage", "alternative", "literal", "worthReporting"],
         "properties": [
             "improved": ["type": "string"],
             "sourceLanguage": ["type": "string", "enum": ["en", "it", "mixed"]],
+            "worthReporting": ["type": "boolean"],
             "literal": ["type": ["string", "null"]],
             "alternative": ["type": ["string", "null"]],
             "notes": [
