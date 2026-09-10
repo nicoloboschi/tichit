@@ -20,11 +20,13 @@ a boundary only in chat apps where it sends the message (`returnSendsApps`); in 
 client or editor it is treated as a line break and the lines are joined, so a paragraph
 typed across several lines stays one sentence.
 
-What is deliberately **not** recorded:
+Capture is an **allowlist**: only Brave Browser and Slack are recorded
+(`KeystrokeCapture.capturedApps`). Every other app is ignored, including any installed
+later — add a bundle ID there to widen it.
+
+Within those two apps, also **not** recorded:
 
 - anything typed while macOS secure input is on (password fields)
-- anything typed in Keychain Access, 1Password, Bitwarden, Terminal, iTerm, Warp
-  (`KeystrokeCapture.defaultDenylist`)
 - ⌘/⌃/⌥ shortcuts
 - anything that doesn't look like prose: under 12 chars, fewer than 3 words,
   under 55% letters, or starting with a URL or path

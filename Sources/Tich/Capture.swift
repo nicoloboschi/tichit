@@ -73,30 +73,18 @@ final class KeystrokeCapture: ObservableObject {
         }
     }
 
-    /// Apps whose typing is never recorded. Sensitive by nature or pure noise.
-    static let defaultDenylist: Set<String> = [
-        "com.apple.keychainaccess",
-        "com.1password.1password",
-        "com.agilebits.onepassword7",
-        "com.bitwarden.desktop",
-        "com.apple.Terminal",
-        "com.googlecode.iterm2",
-        "dev.warp.Warp-Stable",
-        "com.apple.SecurityAgent",
-        "dev.tich.app",
+    /// The only apps whose typing is recorded. An allowlist, not a denylist: anything
+    /// not named here — terminals, password managers, anything installed later — is
+    /// ignored without having to be anticipated.
+    static let capturedApps: Set<String> = [
+        "com.brave.Browser",
+        "com.tinyspeck.slackmacgap",
     ]
 
     /// Apps where Return sends the message, so it really is the end of a thought.
     /// Everywhere else Return is just a line break inside a paragraph.
     static let returnSendsApps: Set<String> = [
         "com.tinyspeck.slackmacgap",
-        "com.hnc.Discord",
-        "net.whatsapp.WhatsApp",
-        "com.apple.MobileSMS",
-        "org.telegram.desktop",
-        "ru.keepcoder.Telegram",
-        "com.microsoft.teams2",
-        "com.apple.iChat",
     ]
 
     private var tap: CFMachPort?
@@ -188,7 +176,7 @@ final class KeystrokeCapture: ObservableObject {
         }
 
         let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? ""
-        if Self.defaultDenylist.contains(frontmost) {
+        guard Self.capturedApps.contains(frontmost) else {
             buffer = ""
             return
         }
