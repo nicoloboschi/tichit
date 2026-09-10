@@ -77,8 +77,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func notifyNotable(_ review: Review) {
         let content = UNMutableNotificationContent()
         content.title = "Better English"
-        content.subtitle = review.original
-        content.body = review.improved
+        content.subtitle = review.improved
+        // Each correction as "wrong → right", the wrong half struck through, so the
+        // change is readable at a glance without opening anything.
+        content.body = review.notes
+            .prefix(3)
+            .map { "\($0.original.struckThrough)  →  \($0.suggestion)" }
+            .joined(separator: "\n")
         content.sound = nil
 
         let request = UNNotificationRequest(

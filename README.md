@@ -83,10 +83,10 @@ later. Within those two, also never recorded:
 - anything that doesn't look like prose: under 12 chars, fewer than 3 words,
   under 55% letters, or starting with a URL or path
 
-Sentences split on `.`/`!`/`?`, after 3s idle, or when you switch app. Return is a
-boundary only in Slack, where it sends the message; in Brave it is treated as a line
-break so a paragraph typed across lines stays one sentence. Everything is stored
-locally in `~/Library/Application Support/Tichit/captured.jsonl`.
+A sentence is closed **only when you press Return** — the moment you committed to the
+words. Half-typed thoughts are never reviewed, and switching away from Brave or Slack
+discards whatever was in progress. Everything is stored locally in
+`~/Library/Application Support/Tichit/captured.jsonl`.
 
 > **Note:** the app is ad-hoc signed, so its code hash changes on every rebuild and
 > the Accessibility grant stops matching — while System Settings still shows Tichit as
@@ -164,6 +164,7 @@ Sources/Tichit/
   RootView.swift           the tabbed shell: Improve / Captured / History
   Capture.swift            optional system-wide typing capture (Brave + Slack)
   ReviewQueue.swift        reviews captured sentences serially, decides what to flag
+  Strikethrough.swift      plain-text strikethrough for notification bodies
   CapturedView.swift       the reviewed captures, flagged ones first
   Logo.swift               the mark, drawn in code, and the status dot
 ```

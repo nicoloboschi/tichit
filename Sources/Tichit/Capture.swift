@@ -107,9 +107,7 @@ final class KeystrokeCapture: ObservableObject {
     private var source: CFRunLoopSource?
     private var buffer = ""
     private var bufferApp = ""
-    private var idleTimer: Timer?
 
-    private let idleFlush: TimeInterval = 3
     private let maxBuffer = 2000
 
     private init() {
@@ -118,8 +116,8 @@ final class KeystrokeCapture: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            // Switching apps ends the thought, whether or not it ended in a period.
-            MainActor.assumeIsolated { self?.flush() }
+            // Switching away abandons whatever was half-typed; it was never sent.
+            MainActor.assumeIsolated { self?.buffer = "" }
         }
     }
 
@@ -272,21 +270,11 @@ final class KeystrokeCapture: ObservableObject {
         switch keyCode {
         case 51: // delete
             if !buffer.isEmpty { buffer.removeLast() }
-            restartIdleTimer()
             return
         case 36, 76: // return, enter
-            // In a chat app Return sends the message, so it ends the thought. In a
-            // mail client or editor it is a line break inside a paragraph, and
-            // flushing there would cut sentences in half — join the lines instead and
-            // let the terminator, the idle timer or an app switch close the sentence.
-            if buffer.trimmingCharacters(in: .whitespaces).isEmpty {
-                buffer = ""
-            } else if Self.returnSendsApps.contains(frontmost) || endsSentence(buffer) {
-                flush()
-            } else {
-                buffer.append(" ")
-                restartIdleTimer()
-            }
+            // The only boundary. A half-typed thought is not worth reviewing, and
+            // pressing Return is the moment you committed to the words.
+            flush()
             return
         case 53: // escape
             buffer = ""
@@ -305,35 +293,17 @@ final class KeystrokeCapture: ObservableObject {
         }
 
         buffer.append(text)
-        restartIdleTimer()
 
-        // Flush on a sentence terminator so each stored row is one thought.
-        if let last = buffer.last, ".!?".contains(last) {
-            flush()
-        } else if buffer.count >= maxBuffer {
-            flush()
+        // Nothing else closes a sentence; the cap only stops runaway growth.
+        if buffer.count >= maxBuffer {
+            buffer = ""
         }
     }
 
-    private func endsSentence(_ text: String) -> Bool {
-        guard let last = text.trimmingCharacters(in: .whitespaces).last else { return false }
-        return ".!?".contains(last)
-    }
 
-    private func wordCount(_ text: String) -> Int {
-        text.split(whereSeparator: { $0 == " " || $0.isNewline }).count
-    }
 
-    private func restartIdleTimer() {
-        idleTimer?.invalidate()
-        idleTimer = Timer.scheduledTimer(withTimeInterval: idleFlush, repeats: false) { [weak self] _ in
-            MainActor.assumeIsolated { self?.flush() }
-        }
-    }
 
     private func flush() {
-        idleTimer?.invalidate()
-        idleTimer = nil
         let text = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
         buffer = ""
         guard Self.looksLikeProse(text) else { return }
